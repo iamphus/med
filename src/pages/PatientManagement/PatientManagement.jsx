@@ -42,6 +42,33 @@ export default function PatientManagement() {
   
   // Local loading states for operations
   const [operationLoading, setOperationLoading] = useState(false);
+  
+  // Privacy protection state
+  const [unmaskedPatientIds, setUnmaskedPatientIds] = useState(new Set());
+  
+  // Helper functions for data masking
+  const maskName = (name) => {
+    const parts = name.split(' ');
+    if (parts.length === 1) return name.charAt(0) + '***';
+    return parts[0] + ' ' + parts.slice(1).map(p => p.charAt(0) + '*').join(' ');
+  };
+  
+  const maskPhone = (phone) => {
+    if (!phone) return '';
+    return phone.slice(0, 3) + '****' + phone.slice(-2);
+  };
+  
+  const toggleUnmask = (patientId) => {
+    setUnmaskedPatientIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(patientId)) {
+        newSet.delete(patientId);
+      } else {
+        newSet.add(patientId);
+      }
+      return newSet;
+    });
+  };
 
   // Filter logic - now using Firestore data
   const filteredPatients = useMemo(() => {
@@ -310,101 +337,144 @@ export default function PatientManagement() {
                 <th>Bệnh nền & Dị ứng</th>
                 <th style={{ width: '160px' }}>SĐT Khẩn cấp</th>
                 <th style={{ width: '120px' }}>Trạng thái</th>
-                <th style={{ width: '160px', textAlign: 'center' }}>Tác vụ</th>
+                <th style={{ width: '200px', textAlign: 'center' }}>Tác vụ</th>
               </tr>
             </thead>
             <tbody>
               {filteredPatients.length > 0 ? (
-                filteredPatients.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div className="patient-name-box">
-                        <span className="patient-name-text">{p.name}</span>
-                        <span className="patient-gender-sub">{p.gender}</span>
-                      </div>
-                    </td>
-                    <td>
-                      {p.birthYear} <small className="text-muted">({calculateAge(p.birthYear)}t)</small>
-                    </td>
-                    <td>
-                      <span className="badge badge-primary">{p.bloodType}</span>
-                    </td>
-                    <td>
-                      <div className="tags-cell">
-                        {p.allergies && p.allergies.map((alg, i) => (
-                          <span key={`a-${i}`} className="badge badge-danger">⚠️ {alg}</span>
-                        ))}
-                        {p.conditions && p.conditions.map((cond, i) => (
-                          <span key={`c-${i}`} className="badge badge-warning">{cond}</span>
-                        ))}
-                        {(!p.allergies || p.allergies.length === 0) && (!p.conditions || p.conditions.length === 0) && (
-                          <span className="text-muted font-sm">Bình thường</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      {p.emergencyContacts && p.emergencyContacts.length > 0 ? (
-                        <div className="contact-mini">
-                          <span className="contact-name">{p.emergencyContacts[0].name}</span>
-                          <span className="contact-phone"><FiPhone /> {p.emergencyContacts[0].phone}</span>
+                filteredPatients.map((p) => {
+                  const isUnmasked = unmaskedPatientIds.has(p.id);
+                  
+                  return (
+                    <tr key={p.id}>
+                      <td>
+                        <div className="patient-name-box">
+                          <span className="patient-name-text">{p.name}</span>
+                          <span className="patient-gender-sub">{p.gender}</span>
                         </div>
-                      ) : (
-                        <span className="text-muted">-</span>
-                      )}
-                    </td>
-                    <td>
-                      {p.braceletStatus === 'active' ? (
-                        <span className="badge badge-success">
-                          🟢 Hoạt động
-                        </span>
-                      ) : (
-                        <span className="badge badge-danger">
-                          🔴 Đã khóa
-                        </span>
-                      )}
-                    </td>
-                    <td className="actions-cell">
-                      <div className="actions-flex">
-                        <Link
-                          to={`/emergency/${p.id}`}
-                          className="btn-action view"
-                          title="Xem trang thông tin cấp cứu công khai"
-                          target="_blank"
-                        >
-                          <FiEye />
-                        </Link>
-                        <button
-                          onClick={() => setQrPatient(p)}
-                          className="btn-action qr"
-                          title="Tạo & Tải mã QR"
-                        >
-                          <FiMaximize />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(p)}
-                          className="btn-action edit"
-                          title="Chỉnh sửa thông tin"
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          onClick={() => handleToggleLock(p.id)}
-                          className={`btn-action ${p.braceletStatus === 'active' ? 'lock' : 'unlock'}`}
-                          title={p.braceletStatus === 'active' ? 'Khóa vòng tay' : 'Mở khóa vòng tay'}
-                        >
-                          {p.braceletStatus === 'active' ? <FiLock /> : <FiUnlock />}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          className="btn-action delete"
-                          title="Xóa"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td>
+                        {p.birthYear} <small className="text-muted">({calculateAge(p.birthYear)}t)</small>
+                      </td>
+                      <td>
+                        <span className="badge badge-primary">{p.bloodType}</span>
+                      </td>
+                      <td>
+                        <div className="tags-cell">
+                          {(() => {
+                            const allergies = p.allergies || [];
+                            const conditions = p.conditions || [];
+                            const totalItems = allergies.length + conditions.length;
+                            const maxDisplay = 2;
+                            
+                            if (totalItems === 0) {
+                              return <span className="text-muted font-sm">Bình thường</span>;
+                            }
+                            
+                            const allergyBadges = allergies.slice(0, Math.min(allergies.length, maxDisplay)).map((alg, i) => (
+                              <span key={`a-${i}`} className="badge badge-danger badge-compact" title={alg}>⚠️ {alg}</span>
+                            ));
+                            
+                            const remainingSlots = maxDisplay - allergyBadges.length;
+                            const conditionBadges = conditions.slice(0, Math.max(0, remainingSlots)).map((cond, i) => (
+                              <span key={`c-${i}`} className="badge badge-warning badge-compact" title={cond}>{cond}</span>
+                            ));
+                            
+                            const displayedCount = allergyBadges.length + conditionBadges.length;
+                            const remainingCount = totalItems - displayedCount;
+                            
+                            return (
+                              <>
+                                {allergyBadges}
+                                {conditionBadges}
+                                {remainingCount > 0 && (
+                                  <span 
+                                    className="badge badge-secondary badge-compact" 
+                                    title={`${allergies.slice(allergyBadges.length).concat(conditions.slice(conditionBadges.length)).join(', ')}`}
+                                  >
+                                    +{remainingCount}
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </td>
+                      <td>
+                        {p.emergencyContacts && p.emergencyContacts.length > 0 ? (
+                          <div className="contact-mini">
+                            <span className="contact-name">
+                              {p.emergencyContacts[0].name}
+                            </span>
+                            <span className="contact-phone">
+                              <FiPhone /> {isUnmasked ? p.emergencyContacts[0].phone : maskPhone(p.emergencyContacts[0].phone)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
+                      </td>
+                      <td>
+                        {p.braceletStatus === 'active' ? (
+                          <span className="badge badge-success">
+                            🟢 Hoạt động
+                          </span>
+                        ) : (
+                          <span className="badge badge-danger">
+                            🔴 Đã khóa
+                          </span>
+                        )}
+                      </td>
+                      <td className="actions-cell">
+                        <div className="actions-flex">
+                          <button
+                            onClick={() => toggleUnmask(p.id)}
+                            className={`btn-action ${isUnmasked ? 'unmask' : 'mask'}`}
+                            title={isUnmasked ? 'Ẩn số điện thoại' : 'Hiện số điện thoại'}
+                          >
+                            {isUnmasked ? <FiEye /> : <FiShield />}
+                          </button>
+                          <Link
+                            to={`/emergency/${p.id}`}
+                            className="btn-action view"
+                            title="Xem trang thông tin cấp cứu công khai"
+                            target="_blank"
+                          >
+                            <FiEye />
+                          </Link>
+                          <button
+                            onClick={() => setQrPatient(p)}
+                            className="btn-action qr"
+                            title="Tạo & Tải mã QR"
+                          >
+                            <FiMaximize />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(p)}
+                            className="btn-action edit"
+                            title="Chỉnh sửa thông tin"
+                          >
+                            <FiEdit2 />
+                          </button>
+                          <button
+                            onClick={() => handleToggleLock(p.id)}
+                            className={`btn-action ${p.braceletStatus === 'active' ? 'lock' : 'unlock'}`}
+                            title={p.braceletStatus === 'active' ? 'Khóa vòng tay' : 'Mở khóa vòng tay'}
+                          >
+                            {p.braceletStatus === 'active' ? <FiLock /> : <FiUnlock />}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="btn-action delete"
+                            title="Xóa"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="7" className="text-center py-4 text-muted">

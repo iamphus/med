@@ -234,7 +234,30 @@
 .tags-cell {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.3rem;
+  align-items: center;
+  max-width: 250px;
+}
+
+.badge-compact {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  white-space: nowrap;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-secondary {
+  background-color: #64748b;
+  color: #fff;
+  cursor: help;
+  transition: all 0.2s;
+}
+
+.badge-secondary:hover {
+  background-color: #475569;
+  transform: scale(1.05);
 }
 
 .font-sm {
@@ -346,6 +369,29 @@
 }
 .btn-action.delete:hover {
   background-color: #fee2e2;
+}
+
+.btn-action.mask {
+  color: #6366f1;
+  border-color: #c7d2fe;
+}
+.btn-action.mask:hover {
+  background-color: #e0e7ff;
+}
+
+.btn-action.unmask {
+  color: #10b981;
+  border-color: #a7f3d0;
+}
+.btn-action.unmask:hover {
+  background-color: #d1fae5;
+}
+
+.masked-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-style: italic;
 }
 
 .mb-3 {
