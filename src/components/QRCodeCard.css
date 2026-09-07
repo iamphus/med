@@ -1,0 +1,60 @@
+/* QR Code Card Modal Styling */
+
+.qr-modal-dialog {
+  max-width: 460px;
+}
+
+.qr-box-wrapper {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  display: inline-block;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.qr-patient-meta {
+  margin-top: 0.5rem;
+}
+
+.qr-patient-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.qr-patient-sub {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.qr-url-preview {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+  word-break: break-all;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.qr-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.qr-modal-actions .btn {
+  width: 100%;
+}
+
+.qr-status-indicator {
+  display: flex;
+  align-items: center;
+}

@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: Check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // ==============================================
+    // PATIENTS COLLECTION
+    // ==============================================
+    match /patients/{patientId} {
+      // READ: 
+      // - Authenticated users can read all patients (for dashboard)
+      // - Public emergency info endpoint will use Cloud Functions (not direct Firestore access)
+      allow read: if isAuthenticated();
+      
+      // CREATE: Only authenticated users can create patients
+      allow create: if isAuthenticated() 
+        && request.resource.data.name is string
+        && request.resource.data.bloodType is string
+        && request.resource.data.braceletStatus in ['active', 'locked']
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+      
+      // UPDATE: Only authenticated users can update patients
+      allow update: if isAuthenticated()
+        && request.resource.data.updatedAt is timestamp;
+      
+      // DELETE: Only authenticated users can delete patients
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==============================================
+    // USERS COLLECTION (Future: for role-based access)
+    // ==============================================
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isOwner(userId);
+      
+      // Users can update their own profile
+      allow update: if isOwner(userId);
+      
+      // Only admins can create users (will be implemented via Cloud Functions)
+      allow create: if false;
+      
+      // Users cannot delete themselves
+      allow delete: if false;
+    }
+    
+    // ==============================================
+    // AUDIT LOGS (Future: for activity tracking)
+    // ==============================================
+    match /auditLogs/{logId} {
+      // Only authenticated users can read logs
+      allow read: if isAuthenticated();
+      
+      // Logs are created via backend only
+      allow write: if false;
+    }
+    
+    // ==============================================
+    // DEFAULT: DENY ALL
+    // ==============================================
+    // Deny access to all other collections by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
