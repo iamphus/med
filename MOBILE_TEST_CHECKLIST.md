@@ -218,9 +218,9 @@
 [Ghi chú về các vấn đề tìm thấy]
 ```
 
----
+--
 
-## 🛠️ Debug Tools
+## 🛠️ Debug Tool
 
 ### Chrome DevTools
 ```
