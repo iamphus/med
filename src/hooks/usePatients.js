@@ -11,25 +11,60 @@ import {
   orderBy,
   onSnapshot,
   serverTimestamp,
-  where
+  where,
+  limit,
+  startAfter,
+  endBefore,
+  limitToLast
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const COLLECTION_NAME = 'patients';
 
-export const usePatients = () => {
+export const usePatients = (pageSize = 20) => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [firstVisible, setFirstVisible] = useState(null);
+  const [pageSnapshots, setPageSnapshots] = useState({}); // Cache cho mỗi page
 
-  // Realtime listener cho patients collection
+  // Đếm tổng số bệnh nhân (chỉ chạy 1 lần)
+  useEffect(() => {
+    const fetchTotalCount = async () => {
+      try {
+        const q = query(collection(db, COLLECTION_NAME));
+        const snapshot = await getDocs(q);
+        setTotalCount(snapshot.size);
+      } catch (err) {
+        console.error('Error counting patients:', err);
+      }
+    };
+    
+    fetchTotalCount();
+  }, []);
+
+  // Fetch patients với pagination
   useEffect(() => {
     setLoading(true);
     
-    const q = query(
+    let q = query(
       collection(db, COLLECTION_NAME),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(pageSize)
     );
+
+    // Nếu có cache cho page này, dùng startAfter
+    if (currentPage > 1 && pageSnapshots[currentPage - 1]) {
+      q = query(
+        collection(db, COLLECTION_NAME),
+        orderBy('createdAt', 'desc'),
+        startAfter(pageSnapshots[currentPage - 1]),
+        limit(pageSize)
+      );
+    }
 
     const unsubscribe = onSnapshot(
       q,
@@ -37,13 +72,25 @@ export const usePatients = () => {
         const patientsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          // Convert Firestore Timestamp to Date
           createdAt: doc.data().createdAt?.toDate(),
           updatedAt: doc.data().updatedAt?.toDate(),
-          dateOfBirth: doc.data().dateOfBirth // Keep as string
+          dateOfBirth: doc.data().dateOfBirth
         }));
         
         setPatients(patientsData);
+        
+        // Lưu snapshot cuối và đầu của page
+        if (snapshot.docs.length > 0) {
+          setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+          setFirstVisible(snapshot.docs[0]);
+          
+          // Cache snapshot cuối của page hiện tại
+          setPageSnapshots(prev => ({
+            ...prev,
+            [currentPage]: snapshot.docs[snapshot.docs.length - 1]
+          }));
+        }
+        
         setLoading(false);
         setError(null);
       },
@@ -55,7 +102,24 @@ export const usePatients = () => {
     );
 
     return unsubscribe;
-  }, []);
+  }, [currentPage, pageSize]);
+
+  // Navigation functions
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
+
+  const nextPage = () => {
+    if (currentPage < Math.ceil(totalCount / pageSize)) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
 
   // Thêm bệnh nhân mới
   const addPatient = async (patientData) => {
@@ -65,6 +129,9 @@ export const usePatients = () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
+      
+      // Cập nhật total count
+      setTotalCount(prev => prev + 1);
       
       return { success: true, id: docRef.id };
     } catch (err) {
@@ -93,6 +160,10 @@ export const usePatients = () => {
   const deletePatient = async (id) => {
     try {
       await deleteDoc(doc(db, COLLECTION_NAME, id));
+      
+      // Cập nhật total count
+      setTotalCount(prev => prev - 1);
+      
       return { success: true };
     } catch (err) {
       console.error('Error deleting patient:', err);
@@ -126,7 +197,7 @@ export const usePatients = () => {
     }
   }, []);
 
-  // Search bệnh nhân (client-side search vì Firestore không hỗ trợ full-text search)
+  // Search bệnh nhân (client-side search trong page hiện tại)
   const searchPatients = (searchTerm) => {
     if (!searchTerm) return patients;
     
@@ -141,14 +212,23 @@ export const usePatients = () => {
     );
   };
 
+  const totalPages = Math.ceil(totalCount / pageSize);
+
   return {
     patients,
     loading,
     error,
+    totalCount,
+    currentPage,
+    totalPages,
+    pageSize,
     addPatient,
     updatePatient,
     deletePatient,
     getPatientById,
-    searchPatients
+    searchPatients,
+    goToPage,
+    nextPage,
+    prevPage
   };
 };

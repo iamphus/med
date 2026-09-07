@@ -176,6 +176,8 @@ body {
   font-size: 0.775rem;
   font-weight: 600;
   border-radius: 4px;
+  white-space: nowrap;
+  gap: 0.35rem;
 }
 
 .badge-primary {
@@ -186,6 +188,8 @@ body {
 .badge-success {
   background-color: var(--success-light);
   color: var(--success);
+  min-width: 100px;
+  justify-content: center;
 }
 
 .badge-warning {
@@ -196,6 +200,8 @@ body {
 .badge-danger {
   background-color: var(--danger-light);
   color: var(--danger);
+  min-width: 100px;
+  justify-content: center;
 }
 
 .badge-secondary {
