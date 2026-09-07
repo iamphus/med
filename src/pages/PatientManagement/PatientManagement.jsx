@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FiSearch, FiPlus, FiDownload, FiEdit2, FiTrash2, FiMaximize,
-  FiLock, FiUnlock, FiEye, FiUser, FiPhone, FiHome, FiUsers, FiShield, FiAlertTriangle, FiActivity
+  FiLock, FiUnlock, FiEye, FiUser, FiPhone, FiHome, FiUsers, FiShield, FiAlertTriangle, FiActivity,
+  FiChevronLeft, FiChevronRight
 } from 'react-icons/fi';
 import AdminLayout from '../../components/AdminLayout';
 import PatientForm from './PatientForm';
@@ -12,16 +13,23 @@ import { calculateAge } from '../../data/mockData';
 import './PatientManagement.css';
 
 export default function PatientManagement() {
-  // Firestore hooks
+  // Firestore hooks with pagination (20 per page)
   const { 
     patients, 
     loading: patientsLoading, 
     error: patientsError,
+    totalCount,
+    currentPage,
+    totalPages,
+    pageSize,
     addPatient,
     updatePatient,
     deletePatient,
-    searchPatients
-  } = usePatients();
+    searchPatients,
+    goToPage,
+    nextPage,
+    prevPage
+  } = usePatients(20);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [bloodFilter, setBloodFilter] = useState('ALL');
@@ -50,12 +58,12 @@ export default function PatientManagement() {
 
   // Stats
   const stats = useMemo(() => {
-    const total = patients.length;
+    const total = totalCount; // Use totalCount from pagination
     const active = patients.filter(p => p.braceletStatus === 'active').length;
     const locked = patients.filter(p => p.braceletStatus === 'locked').length;
     const withAllergies = patients.filter(p => p.allergies && p.allergies.length > 0).length;
     return { total, active, locked, withAllergies };
-  }, [patients]);
+  }, [patients, totalCount]);
 
   // Handlers
   const handleCreateNew = () => {
@@ -296,7 +304,6 @@ export default function PatientManagement() {
             <table className="admin-table">
             <thead>
               <tr>
-                <th style={{ width: '80px' }}>ID</th>
                 <th style={{ width: '190px' }}>Họ và tên</th>
                 <th style={{ width: '100px' }}>Năm sinh</th>
                 <th style={{ width: '90px' }}>Nhóm máu</th>
@@ -310,9 +317,6 @@ export default function PatientManagement() {
               {filteredPatients.length > 0 ? (
                 filteredPatients.map((p) => (
                   <tr key={p.id}>
-                    <td className="patient-id-cell">
-                      <strong>#{p.id.replace('patient-', '')}</strong>
-                    </td>
                     <td>
                       <div className="patient-name-box">
                         <span className="patient-name-text">{p.name}</span>
@@ -350,9 +354,13 @@ export default function PatientManagement() {
                     </td>
                     <td>
                       {p.braceletStatus === 'active' ? (
-                        <span className="badge badge-success">🟢 Hoạt động</span>
+                        <span className="badge badge-success">
+                          🟢 Hoạt động
+                        </span>
                       ) : (
-                        <span className="badge badge-danger">🔴 Đã khóa</span>
+                        <span className="badge badge-danger">
+                          🔴 Đã khóa
+                        </span>
                       )}
                     </td>
                     <td className="actions-cell">
@@ -399,7 +407,7 @@ export default function PatientManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="text-center py-4 text-muted">
+                  <td colSpan="7" className="text-center py-4 text-muted">
                     Không tìm thấy bệnh nhân nào phù hợp với bộ lọc.
                   </td>
                 </tr>
@@ -407,6 +415,74 @@ export default function PatientManagement() {
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination */}
+        {!patientsLoading && !patientsError && totalPages > 1 && (
+          <div className="pagination-container">
+            <div className="pagination-info">
+              Hiển thị <strong>{((currentPage - 1) * pageSize) + 1}</strong> - <strong>{Math.min(currentPage * pageSize, totalCount)}</strong> trong tổng số <strong>{totalCount}</strong> bệnh nhân
+            </div>
+            
+            <div className="pagination-controls">
+              <button 
+                onClick={prevPage} 
+                disabled={currentPage === 1}
+                className="pagination-btn"
+                title="Trang trước"
+              >
+                <FiChevronLeft />
+              </button>
+              
+              {/* Page numbers */}
+              <div className="pagination-numbers">
+                {/* First page */}
+                {currentPage > 3 && (
+                  <>
+                    <button onClick={() => goToPage(1)} className="pagination-number">1</button>
+                    {currentPage > 4 && <span className="pagination-dots">...</span>}
+                  </>
+                )}
+                
+                {/* Pages around current */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    return page === currentPage || 
+                           page === currentPage - 1 || 
+                           page === currentPage + 1 ||
+                           (page === currentPage - 2 && currentPage > 2) ||
+                           (page === currentPage + 2 && currentPage < totalPages - 1);
+                  })
+                  .map(page => (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`pagination-number ${page === currentPage ? 'active' : ''}`}
+                    >
+                      {page}
+                    </button>
+                  ))
+                }
+                
+                {/* Last page */}
+                {currentPage < totalPages - 2 && (
+                  <>
+                    {currentPage < totalPages - 3 && <span className="pagination-dots">...</span>}
+                    <button onClick={() => goToPage(totalPages)} className="pagination-number">{totalPages}</button>
+                  </>
+                )}
+              </div>
+              
+              <button 
+                onClick={nextPage} 
+                disabled={currentPage === totalPages}
+                className="pagination-btn"
+                title="Trang sau"
+              >
+                <FiChevronRight />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       )}
 
