@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FiUsers, FiGrid, FiShield, FiSliders, FiLogOut, FiMenu, FiX,
@@ -10,7 +10,16 @@ import './AdminLayout.css';
 export default function AdminLayout({ children, currentTab = 'patients' }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  // Sidebar should be closed by default on mobile, open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    // Check if we're on mobile (< 992px)
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 992;
+    }
+    return false;
+  });
+  
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
@@ -22,9 +31,31 @@ export default function AdminLayout({ children, currentTab = 'patients' }) {
     setShowLogoutModal(false);
     handleLogout();
   };
+  
+  // Handle window resize to close sidebar on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 992 && sidebarOpen) {
+        setSidebarOpen(false);
+      } else if (window.innerWidth >= 992 && !sidebarOpen) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarOpen]);
 
   return (
     <div className="admin-wrapper">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-mobile-overlay" 
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+      
       {/* Sidebar Left */}
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-brand">

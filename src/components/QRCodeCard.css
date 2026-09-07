@@ -58,3 +58,60 @@
   display: flex;
   align-items: center;
 }
+
+/* Responsive QR Card */
+@media (max-width: 600px) {
+  .qr-modal-dialog {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 12px;
+  }
+  
+  .qr-box-wrapper {
+    padding: 1rem;
+  }
+  
+  .qr-patient-name {
+    font-size: 1.15rem;
+  }
+  
+  .qr-patient-sub {
+    font-size: 0.825rem;
+  }
+  
+  .qr-url-preview {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.65rem;
+    max-width: 100%;
+  }
+  
+  .qr-modal-actions {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-box-wrapper {
+    padding: 0.85rem;
+  }
+  
+  .qr-patient-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .qr-patient-sub {
+    font-size: 0.8rem;
+    margin-bottom: 0.65rem;
+  }
+  
+  .qr-url-preview {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .qr-modal-actions {
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+  }
+}

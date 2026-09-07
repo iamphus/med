@@ -12,7 +12,7 @@
   color: #94a3b8;
   display: flex;
   flex-direction: column;
-  transition: width 0.2s ease-in-out;
+  transition: transform 0.3s ease-in-out;
   flex-shrink: 0;
   z-index: 100;
 }
@@ -248,18 +248,60 @@
   color: var(--text-muted);
 }
 
-@media (max-width: 768px) {
+/* Mobile Overlay for Sidebar */
+.sidebar-mobile-overlay {
+  display: none;
+}
+
+@media (max-width: 992px) {
   .admin-sidebar {
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
     box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
   }
   
   .admin-sidebar.closed {
     transform: translateX(-100%);
     width: 240px;
+  }
+  
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-mobile-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  .sidebar-mobile-overlay.hidden {
+    display: none;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  /* Push content to make room when sidebar is in desktop mode */
+  .admin-main-container {
+    margin-left: 0;
+    width: 100%;
   }
   
   .topbar-support-info {
@@ -276,13 +318,46 @@
   }
 }
 
+@media (max-width: 768px) {
+  .admin-topbar {
+    padding: 0 0.75rem;
+  }
+  
+  .topbar-left {
+    gap: 0.5rem;
+  }
+  
+  .topbar-right {
+    gap: 0.5rem;
+  }
+}
+
 @media (max-width: 480px) {
+  .admin-topbar {
+    height: 48px;
+    padding: 0 0.5rem;
+  }
+  
+  .sidebar-toggle-btn {
+    font-size: 1.1rem;
+    padding: 0.2rem;
+  }
+  
   .topbar-user-badge {
     font-size: 0.75rem;
   }
   
+  .topbar-user-badge .user-icon {
+    font-size: 0.9rem;
+  }
+  
   .topbar-user-badge span {
     display: none;
+  }
+  
+  .btn-logout-topbar {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
   }
   
   .btn-logout-topbar span {
@@ -291,6 +366,12 @@
   
   .admin-content-body {
     padding: 0.75rem;
+  }
+  
+  .admin-footer-bar {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.75rem;
+    text-align: center;
   }
 }
 
