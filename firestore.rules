@@ -18,9 +18,9 @@ service cloud.firestore {
     // ==============================================
     match /patients/{patientId} {
       // READ: 
-      // - Authenticated users can read all patients (for dashboard)
-      // - Public emergency info endpoint will use Cloud Functions (not direct Firestore access)
-      allow read: if isAuthenticated();
+      // - PUBLIC ACCESS: Anyone can read patient info for emergency QR code access
+      // - This allows emergency responders to view critical medical info without login
+      allow read: if true;
       
       // CREATE: Only authenticated users can create patients
       allow create: if isAuthenticated() 

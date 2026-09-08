@@ -197,20 +197,51 @@ export const usePatients = (pageSize = 20) => {
     }
   }, []);
 
-  // Search bệnh nhân (client-side search trong page hiện tại)
-  const searchPatients = (searchTerm) => {
-    if (!searchTerm) return patients;
+  // Search bệnh nhân (server-side search across all patients)
+  const searchPatients = useCallback(async (searchTerm) => {
+    if (!searchTerm) {
+      return { success: true, results: patients };
+    }
     
-    const term = searchTerm.toLowerCase();
-    return patients.filter(patient => 
-      patient.name?.toLowerCase().includes(term) ||
-      patient.idNumber?.toLowerCase().includes(term) ||
-      patient.phoneNumber?.includes(term) ||
-      patient.emergencyContact?.toLowerCase().includes(term) ||
-      (patient.conditions && patient.conditions.some(c => c.toLowerCase().includes(term))) ||
-      (patient.allergies && patient.allergies.some(a => a.toLowerCase().includes(term)))
-    );
-  };
+    try {
+      setLoading(true);
+      const term = searchTerm.toLowerCase();
+      
+      // Fetch ALL patients for search (no pagination)
+      const q = query(
+        collection(db, COLLECTION_NAME),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const snapshot = await getDocs(q);
+      const allPatients = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate(),
+        updatedAt: doc.data().updatedAt?.toDate(),
+        dateOfBirth: doc.data().dateOfBirth
+      }));
+      
+      // Filter on client side
+      const results = allPatients.filter(patient => 
+        patient.name?.toLowerCase().includes(term) ||
+        patient.id?.toLowerCase().includes(term) ||
+        patient.phoneNumber?.includes(term) ||
+        (patient.emergencyContacts && patient.emergencyContacts.some(ec => 
+          ec.name?.toLowerCase().includes(term) || ec.phone?.includes(term)
+        )) ||
+        (patient.conditions && patient.conditions.some(c => c.toLowerCase().includes(term))) ||
+        (patient.allergies && patient.allergies.some(a => a.toLowerCase().includes(term)))
+      );
+      
+      setLoading(false);
+      return { success: true, results };
+    } catch (err) {
+      console.error('Error searching patients:', err);
+      setLoading(false);
+      return { success: false, error: err.message, results: [] };
+    }
+  }, [patients]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 

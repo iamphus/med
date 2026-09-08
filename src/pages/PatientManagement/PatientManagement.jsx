@@ -35,10 +35,15 @@ export default function PatientManagement() {
   const [bloodFilter, setBloodFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   
+  // Search results state
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
   // Modals
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
   const [qrPatient, setQrPatient] = useState(null);
+  const [detailPatient, setDetailPatient] = useState(null);
   
   // Local loading states for operations
   const [operationLoading, setOperationLoading] = useState(false);
@@ -70,27 +75,45 @@ export default function PatientManagement() {
     });
   };
 
-  // Filter logic - now using Firestore data
+  // Handle search with debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (searchTerm.trim()) {
+        setIsSearching(true);
+        const result = await searchPatients(searchTerm);
+        if (result.success) {
+          setSearchResults(result.results);
+        }
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
+        setIsSearching(false);
+      }
+    }, 500); // Debounce 500ms
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, searchPatients]);
+
+  // Filter logic - now using search results or current page
   const filteredPatients = useMemo(() => {
-    // First, apply search
-    const searched = searchTerm ? searchPatients(searchTerm) : patients;
+    const dataSource = searchTerm.trim() ? searchResults : patients;
     
-    // Then apply blood and status filters
-    return searched.filter((p) => {
+    return dataSource.filter((p) => {
       const matchBlood = bloodFilter === 'ALL' || p.bloodType === bloodFilter;
       const matchStatus = statusFilter === 'ALL' || p.braceletStatus === statusFilter;
       return matchBlood && matchStatus;
     });
-  }, [patients, searchTerm, bloodFilter, statusFilter, searchPatients]);
+  }, [patients, searchResults, searchTerm, bloodFilter, statusFilter]);
 
-  // Stats
+  // Stats - use all patients or search results
   const stats = useMemo(() => {
-    const total = totalCount; // Use totalCount from pagination
-    const active = patients.filter(p => p.braceletStatus === 'active').length;
-    const locked = patients.filter(p => p.braceletStatus === 'locked').length;
-    const withAllergies = patients.filter(p => p.allergies && p.allergies.length > 0).length;
+    const dataSource = searchTerm.trim() ? searchResults : patients;
+    const total = searchTerm.trim() ? searchResults.length : totalCount;
+    const active = dataSource.filter(p => p.braceletStatus === 'active').length;
+    const locked = dataSource.filter(p => p.braceletStatus === 'locked').length;
+    const withAllergies = dataSource.filter(p => p.allergies && p.allergies.length > 0).length;
     return { total, active, locked, withAllergies };
-  }, [patients, totalCount]);
+  }, [patients, searchResults, searchTerm, totalCount]);
 
   // Handlers
   const handleCreateNew = () => {
@@ -309,12 +332,14 @@ export default function PatientManagement() {
       </div>
 
       {/* Loading & Error States */}
-      {patientsLoading && (
+      {(patientsLoading || isSearching) && (
         <div className="card p-4 text-center">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Đang tải...</span>
           </div>
-          <p className="mt-3 text-muted">Đang tải dữ liệu từ Firestore...</p>
+          <p className="mt-3 text-muted">
+            {isSearching ? 'Đang tìm kiếm...' : 'Đang tải dữ liệu từ Firestore...'}
+          </p>
         </div>
       )}
 
@@ -325,8 +350,22 @@ export default function PatientManagement() {
       )}
 
       {/* Data Table Card */}
-      {!patientsLoading && !patientsError && (
+      {!patientsLoading && !isSearching && !patientsError && (
         <div className="admin-table-card card">
+          {searchTerm.trim() && (
+            <div className="search-info-bar">
+              <span>
+                🔍 Tìm thấy <strong>{filteredPatients.length}</strong> kết quả cho "<strong>{searchTerm}</strong>"
+              </span>
+              <button 
+                className="btn-clear-search"
+                onClick={() => setSearchTerm('')}
+              >
+                ✕ Xóa tìm kiếm
+              </button>
+            </div>
+          )}
+          
           <div className="admin-table-responsive">
             <table className="admin-table">
             <thead>
@@ -478,7 +517,10 @@ export default function PatientManagement() {
               ) : (
                 <tr>
                   <td colSpan="7" className="text-center py-4 text-muted">
-                    Không tìm thấy bệnh nhân nào phù hợp với bộ lọc.
+                    {searchTerm.trim() 
+                      ? `Không tìm thấy bệnh nhân nào phù hợp với từ khóa "${searchTerm}"`
+                      : 'Không tìm thấy bệnh nhân nào phù hợp với bộ lọc.'
+                    }
                   </td>
                 </tr>
               )}
@@ -486,8 +528,8 @@ export default function PatientManagement() {
           </table>
         </div>
         
-        {/* Pagination */}
-        {!patientsLoading && !patientsError && totalPages > 1 && (
+        {/* Pagination - hide when searching */}
+        {!patientsLoading && !isSearching && !patientsError && !searchTerm.trim() && totalPages > 1 && (
           <div className="pagination-container">
             <div className="pagination-info">
               Hiển thị <strong>{((currentPage - 1) * pageSize) + 1}</strong> - <strong>{Math.min(currentPage * pageSize, totalCount)}</strong> trong tổng số <strong>{totalCount}</strong> bệnh nhân

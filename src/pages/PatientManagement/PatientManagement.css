@@ -212,6 +212,39 @@
 }
 
 /* Table Specifics */
+.search-info-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-bottom: 2px solid #60a5fa;
+  font-size: 0.95rem;
+}
+
+.search-info-bar strong {
+  color: #0284c7;
+  font-weight: 700;
+}
+
+.btn-clear-search {
+  background: white;
+  border: 1px solid #93c5fd;
+  color: #0284c7;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-clear-search:hover {
+  background: #0284c7;
+  color: white;
+  border-color: #0284c7;
+}
+
 .patient-id-cell {
   color: var(--primary);
 }
@@ -318,6 +351,14 @@
 
 .btn-action:hover {
   background-color: #f1f5f9;
+}
+
+.btn-action.detail {
+  color: #8b5cf6;
+  border-color: #ddd6fe;
+}
+.btn-action.detail:hover {
+  background-color: #ede9fe;
 }
 
 .btn-action.view {
