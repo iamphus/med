@@ -183,21 +183,13 @@ export default function Login() {
               )}
             </button>
 
-            <div className="login-divider">Demo Credentials</div>
+            
 
-            <div className="login-demo-hint">
-              <p>
-                <strong>Tạo tài khoản admin đầu tiên:</strong>
-                <br />
-                Vào Firebase Console → Authentication → Users → Add User
-                <br />
-                <code>admin@medlinkband.vn</code> / <code>password của bạn</code>
-              </p>
-            </div>
+            
           </form>
 
           <div className="login-footer">
-            <p>&copy; 2024 MedLink Band Vietnam. All rights reserved.</p>
+            <p>&copy; 2026 MedLink Band Vietnam. All rights reserved.</p>
             <div className="login-footer-links">
               <a href="#privacy" className="login-footer-link">Chính sách bảo mật</a>
               <a href="#terms" className="login-footer-link">Điều khoản sử dụng</a>
