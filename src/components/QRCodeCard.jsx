@@ -6,7 +6,8 @@ import './QRCodeCard.css';
 export default function QRCodeCard({ patient, onClose }) {
   const [copied, setCopied] = useState(false);
   const qrRef = useRef(null);
-
+  
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const emergencyUrl = `${window.location.origin}/emergency/${patient.id}`;
 
   const handleCopyLink = () => {
@@ -50,12 +51,90 @@ export default function QRCodeCard({ patient, onClose }) {
       ctx.font = 'bold 12px Inter, sans-serif';
       ctx.fillText('MEDLINK BAND - THÔNG TIN CẤP CỨU Y TẾ', canvas.width / 2, canvas.height - 20);
 
-      // Download
+      // Download - iOS compatible
       const pngFile = canvas.toDataURL('image/png');
-      const downloadLink = document.createElement('a');
-      downloadLink.download = `QR_MedLink_${patient.name.replace(/\s+/g, '_')}_${patient.id}.png`;
-      downloadLink.href = pngFile;
-      downloadLink.click();
+      
+      // Detect iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      
+      if (isIOS) {
+        // iOS: Open in new tab (user can long-press to save)
+        const newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>QR Code - ${patient.name}</title>
+                <style>
+                  body { 
+                    margin: 0; 
+                    padding: 20px; 
+                    background: #f1f5f9;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                  }
+                  .container {
+                    background: white;
+                    padding: 24px;
+                    border-radius: 16px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    text-align: center;
+                  }
+                  img { 
+                    max-width: 100%; 
+                    height: auto; 
+                    border-radius: 8px;
+                    margin: 16px 0;
+                  }
+                  h2 { 
+                    color: #0f172a; 
+                    margin: 0 0 8px 0;
+                    font-size: 20px;
+                  }
+                  p { 
+                    color: #64748b; 
+                    margin: 0 0 16px 0;
+                    font-size: 14px;
+                  }
+                  .instruction {
+                    background: #f0f9ff;
+                    border: 1px solid #0284c7;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-top: 16px;
+                    font-size: 14px;
+                    color: #0369a1;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <h2>${patient.name}</h2>
+                  <p>Mã BN: ${patient.id} • Nhóm máu: ${patient.bloodType}</p>
+                  <img src="${pngFile}" alt="QR Code">
+                  <div class="instruction">
+                    <strong>📱 Cách lưu trên iOS:</strong><br>
+                    Nhấn giữ vào ảnh và chọn "Lưu vào Ảnh"
+                  </div>
+                </div>
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+        }
+      } else {
+        // Android/Desktop: Direct download
+        const downloadLink = document.createElement('a');
+        downloadLink.download = `QR_MedLink_${patient.name.replace(/\s+/g, '_')}_${patient.id}.png`;
+        downloadLink.href = pngFile;
+        downloadLink.click();
+      }
     };
 
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
@@ -95,7 +174,7 @@ export default function QRCodeCard({ patient, onClose }) {
 
           <div className="qr-modal-actions">
             <button onClick={handleDownloadQR} className="btn btn-primary btn-lg">
-              <FiDownload /> Tải Mã QR (PNG)
+              <FiDownload /> {isIOS ? 'Mở ảnh QR' : 'Tải Mã QR (PNG)'}
             </button>
             <button onClick={handleCopyLink} className="btn btn-outline btn-lg">
               {copied ? <FiCheck className="text-success" /> : <FiCopy />}
