@@ -20,6 +20,43 @@ export default function QRCodeCard({ patient, onClose }) {
     const svg = qrRef.current.querySelector('svg');
     if (!svg) return;
 
+    // CRITICAL: Open window IMMEDIATELY for iOS (before async operations)
+    // iOS blocks window.open() if called after async/await or setTimeout
+    const newWindow = isIOS ? window.open('', '_blank') : null;
+    
+    // Show loading in the new window immediately
+    if (newWindow) {
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Đang tải QR Code...</title>
+            <style>
+              body { 
+                margin: 0; 
+                padding: 20px; 
+                background: #f1f5f9;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                text-align: center;
+              }
+              .loading {
+                color: #64748b;
+                font-size: 16px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="loading">⏳ Đang tạo mã QR...</div>
+          </body>
+        </html>
+      `);
+    }
+
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -51,83 +88,81 @@ export default function QRCodeCard({ patient, onClose }) {
       ctx.font = 'bold 12px Inter, sans-serif';
       ctx.fillText('MEDLINK BAND - THÔNG TIN CẤP CỨU Y TẾ', canvas.width / 2, canvas.height - 20);
 
-      // Download - iOS compatible
+      // Get PNG data
       const pngFile = canvas.toDataURL('image/png');
       
-      // Detect iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      
-      if (isIOS) {
-        // iOS: Open in new tab (user can long-press to save)
-        const newWindow = window.open();
-        if (newWindow) {
-          newWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>QR Code - ${patient.name}</title>
-                <style>
-                  body { 
-                    margin: 0; 
-                    padding: 20px; 
-                    background: #f1f5f9;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 100vh;
-                  }
-                  .container {
-                    background: white;
-                    padding: 24px;
-                    border-radius: 16px;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                    text-align: center;
-                  }
-                  img { 
-                    max-width: 100%; 
-                    height: auto; 
-                    border-radius: 8px;
-                    margin: 16px 0;
-                  }
-                  h2 { 
-                    color: #0f172a; 
-                    margin: 0 0 8px 0;
-                    font-size: 20px;
-                  }
-                  p { 
-                    color: #64748b; 
-                    margin: 0 0 16px 0;
-                    font-size: 14px;
-                  }
-                  .instruction {
-                    background: #f0f9ff;
-                    border: 1px solid #0284c7;
-                    border-radius: 8px;
-                    padding: 12px;
-                    margin-top: 16px;
-                    font-size: 14px;
-                    color: #0369a1;
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <h2>${patient.name}</h2>
-                  <p>Mã BN: ${patient.id} • Nhóm máu: ${patient.bloodType}</p>
-                  <img src="${pngFile}" alt="QR Code">
-                  <div class="instruction">
-                    <strong>📱 Cách lưu trên iOS:</strong><br>
-                    Nhấn giữ vào ảnh và chọn "Lưu vào Ảnh"
-                  </div>
+      if (isIOS && newWindow) {
+        // iOS: Update the already-opened window with final content
+        newWindow.document.open();
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>QR Code - ${patient.name}</title>
+              <style>
+                body { 
+                  margin: 0; 
+                  padding: 20px; 
+                  background: #f1f5f9;
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 100vh;
+                }
+                .container {
+                  background: white;
+                  padding: 24px;
+                  border-radius: 16px;
+                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                  text-align: center;
+                  max-width: 400px;
+                }
+                img { 
+                  max-width: 100%; 
+                  height: auto; 
+                  border-radius: 8px;
+                  margin: 16px 0;
+                }
+                h2 { 
+                  color: #0f172a; 
+                  margin: 0 0 8px 0;
+                  font-size: 20px;
+                }
+                p { 
+                  color: #64748b; 
+                  margin: 0 0 16px 0;
+                  font-size: 14px;
+                }
+                .instruction {
+                  background: #f0f9ff;
+                  border: 1px solid #0284c7;
+                  border-radius: 8px;
+                  padding: 12px;
+                  margin-top: 16px;
+                  font-size: 14px;
+                  color: #0369a1;
+                  line-height: 1.5;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h2>${patient.name}</h2>
+                <p>Mã BN: ${patient.id} • Nhóm máu: ${patient.bloodType}</p>
+                <img src="${pngFile}" alt="QR Code">
+                <div class="instruction">
+                  <strong>📱 Cách lưu ảnh:</strong><br>
+                  Nhấn giữ vào ảnh phía trên<br>
+                  → Chọn "Lưu vào Ảnh"
                 </div>
-              </body>
-            </html>
-          `);
-          newWindow.document.close();
-        }
+              </div>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
       } else {
         // Android/Desktop: Direct download
         const downloadLink = document.createElement('a');
