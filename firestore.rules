@@ -39,6 +39,35 @@ service cloud.firestore {
     }
     
     // ==============================================
+    // MEDICAL DATA COLLECTIONS (Allergies & Conditions)
+    // ==============================================
+    // These collections store reference medical data
+    // for autocomplete/search in patient forms
+    match /medical_allergies/{allergyId} {
+      // PUBLIC READ: Allow anyone to search allergies (no sensitive data)
+      allow read: if true;
+      
+      // WRITE: Only backend/admin can manage medical data
+      allow write: if false;
+    }
+    
+    match /medical_conditions/{conditionId} {
+      // PUBLIC READ: Allow anyone to search conditions (no sensitive data)
+      allow read: if true;
+      
+      // WRITE: Only backend/admin can manage medical data
+      allow write: if false;
+    }
+    
+    match /medical_metadata/{docId} {
+      // PUBLIC READ: Allow anyone to read metadata
+      allow read: if true;
+      
+      // WRITE: Only backend/admin can update metadata
+      allow write: if false;
+    }
+    
+    // ==============================================
     // USERS COLLECTION (Future: for role-based access)
     // ==============================================
     match /users/{userId} {

@@ -1,0 +1,211 @@
+.medical-autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.autocomplete-input-wrapper .input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--primary-color, #0ea5e9);
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.autocomplete-input {
+  padding-left: 38px !important;
+  border: 2px solid #e5e7eb !important;
+  transition: all 0.2s ease !important;
+}
+
+.autocomplete-input:focus {
+  border-color: var(--primary-color, #0ea5e9) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1) !important;
+}
+
+.autocomplete-dropdown {
+  max-height: 280px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 2px solid var(--primary-color, #0ea5e9);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.25), 0 4px 16px rgba(0,0,0,0.15);
+  z-index: 10000 !important; /* Phải cao hơn modal (1001) */
+  /* position, top, left, width được set qua inline style */
+}
+
+.autocomplete-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.focused {
+  background-color: #eff6ff;
+  border-left: 3px solid var(--primary-color, #0ea5e9);
+  padding-left: 13px;
+}
+
+.autocomplete-item-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.autocomplete-item-name {
+  font-weight: 600;
+  color: #1e293b;
+  flex: 1;
+  font-size: 14px;
+}
+
+.severity-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.severity-high {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.severity-medium {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
+  border: 1px solid #fbbf24;
+}
+
+.severity-low {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #0284c7;
+  border: 1px solid #93c5fd;
+}
+
+.autocomplete-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.autocomplete-item-category {
+  font-style: italic;
+  color: #64748b;
+}
+
+.autocomplete-item-icd {
+  color: #0ea5e9;
+  font-weight: 600;
+  background-color: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  min-height: 48px;
+}
+
+.tag-list:empty {
+  display: none;
+}
+
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+.tag-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+/* Scrollbar styling */
+.autocomplete-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
+  border-radius: 4px;
+  border: 2px solid #f1f5f9;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .autocomplete-dropdown {
+    max-height: 200px;
+  }
+
+  .autocomplete-item {
+    padding: 10px 12px;
+  }
+
+  .autocomplete-item-name {
+    font-size: 14px;
+  }
+
+  .autocomplete-item-meta {
+    font-size: 11px;
+  }
+}

@@ -13,7 +13,7 @@ import { calculateAge } from '../../data/mockData';
 import './PatientManagement.css';
 
 export default function PatientManagement() {
-  // Firestore hooks with pagination (20 per page)
+  // Firestore hooks with pagination (10 per page)
   const { 
     patients, 
     loading: patientsLoading, 
@@ -29,7 +29,7 @@ export default function PatientManagement() {
     goToPage,
     nextPage,
     prevPage
-  } = usePatients(20);
+  } = usePatients(10);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [bloodFilter, setBloodFilter] = useState('ALL');
@@ -366,16 +366,17 @@ export default function PatientManagement() {
             </div>
           )}
           
+          {/* Desktop Table View */}
           <div className="admin-table-responsive">
             <table className="admin-table">
             <thead>
               <tr>
-                <th style={{ width: '190px' }}>Họ và tên</th>
-                <th style={{ width: '100px' }}>Năm sinh</th>
+                <th style={{ width: '220px' }}>Họ và tên</th>
+                <th style={{ width: '95px' }}>Năm sinh</th>
                 <th style={{ width: '90px' }}>Nhóm máu</th>
-                <th>Bệnh nền & Dị ứng</th>
+                <th style={{ width: '180px' }}>Bệnh nền & Dị ứng</th>
                 <th style={{ width: '160px' }}>SĐT Khẩn cấp</th>
-                <th style={{ width: '120px' }}>Trạng thái</th>
+                <th style={{ width: '115px' }}>Trạng thái</th>
                 <th style={{ width: '200px', textAlign: 'center' }}>Tác vụ</th>
               </tr>
             </thead>
@@ -473,14 +474,13 @@ export default function PatientManagement() {
                           >
                             {isUnmasked ? <FiEye /> : <FiShield />}
                           </button>
-                          <Link
-                            to={`/emergency/${p.id}`}
+                          <button
+                            onClick={() => window.open(`/emergency/${p.id}`, '_blank')}
                             className="btn-action view"
                             title="Xem trang thông tin cấp cứu công khai"
-                            target="_blank"
                           >
                             <FiEye />
-                          </Link>
+                          </button>
                           <button
                             onClick={() => setQrPatient(p)}
                             className="btn-action qr"
@@ -526,6 +526,153 @@ export default function PatientManagement() {
               )}
             </tbody>
           </table>
+        </div>
+        
+        {/* Mobile Card View */}
+        <div className="mobile-patient-cards">
+          {filteredPatients.length > 0 ? (
+            filteredPatients.map((p) => {
+              const isUnmasked = unmaskedPatientIds.has(p.id);
+              
+              return (
+                <div key={p.id} className="mobile-patient-card">
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-name">
+                      <h4>{p.name}</h4>
+                      <span className="subtitle">{p.gender} • {p.birthYear} ({calculateAge(p.birthYear)}t)</span>
+                    </div>
+                    <div className="mobile-card-status">
+                      {p.braceletStatus === 'active' ? (
+                        <span className="badge badge-success">🟢 Hoạt động</span>
+                      ) : (
+                        <span className="badge badge-danger">🔴 Đã khóa</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mobile-card-body">
+                    <div className="mobile-card-field">
+                      <div className="mobile-card-label">Nhóm máu</div>
+                      <div className="mobile-card-value">
+                        <span className="badge badge-primary">{p.bloodType}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mobile-card-field">
+                      <div className="mobile-card-label">Liên hệ</div>
+                      <div className="mobile-card-value">
+                        {p.emergencyContacts && p.emergencyContacts.length > 0 ? (
+                          <div className="contact-mini">
+                            <span className="contact-name">{p.emergencyContacts[0].name}</span>
+                            <span className="contact-phone">
+                              <FiPhone /> {isUnmasked ? p.emergencyContacts[0].phone : maskPhone(p.emergencyContacts[0].phone)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {((p.allergies && p.allergies.length > 0) || (p.conditions && p.conditions.length > 0)) && (
+                      <div className="mobile-card-field full-width">
+                        <div className="mobile-card-label">Bệnh nền & Dị ứng</div>
+                        <div className="mobile-card-value">
+                          <div className="tags-cell">
+                            {(() => {
+                              const allergies = p.allergies || [];
+                              const conditions = p.conditions || [];
+                              const totalItems = allergies.length + conditions.length;
+                              const maxDisplay = 3;
+                              
+                              const allergyBadges = allergies.slice(0, Math.min(allergies.length, maxDisplay)).map((alg, i) => (
+                                <span key={`a-${i}`} className="badge badge-danger badge-compact" title={alg}>⚠️ {alg}</span>
+                              ));
+                              
+                              const remainingSlots = maxDisplay - allergyBadges.length;
+                              const conditionBadges = conditions.slice(0, Math.max(0, remainingSlots)).map((cond, i) => (
+                                <span key={`c-${i}`} className="badge badge-warning badge-compact" title={cond}>{cond}</span>
+                              ));
+                              
+                              const displayedCount = allergyBadges.length + conditionBadges.length;
+                              const remainingCount = totalItems - displayedCount;
+                              
+                              return (
+                                <>
+                                  {allergyBadges}
+                                  {conditionBadges}
+                                  {remainingCount > 0 && (
+                                    <span 
+                                      className="badge badge-secondary badge-compact" 
+                                      title={`${allergies.slice(allergyBadges.length).concat(conditions.slice(conditionBadges.length)).join(', ')}`}
+                                    >
+                                      +{remainingCount}
+                                    </span>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mobile-card-actions">
+                    <button
+                      onClick={() => toggleUnmask(p.id)}
+                      className={`btn-action ${isUnmasked ? 'unmask' : 'mask'}`}
+                      title={isUnmasked ? 'Ẩn số điện thoại' : 'Hiện số điện thoại'}
+                    >
+                      {isUnmasked ? <FiEye /> : <FiShield />}
+                    </button>
+                    <button
+                      onClick={() => window.open(`/emergency/${p.id}`, '_blank')}
+                      className="btn-action view"
+                      title="Xem trang cấp cứu"
+                    >
+                      <FiEye />
+                    </button>
+                    <button
+                      onClick={() => setQrPatient(p)}
+                      className="btn-action qr"
+                      title="Tạo mã QR"
+                    >
+                      <FiMaximize />
+                    </button>
+                    <button
+                      onClick={() => handleEdit(p)}
+                      className="btn-action edit"
+                      title="Chỉnh sửa"
+                    >
+                      <FiEdit2 />
+                    </button>
+                    <button
+                      onClick={() => handleToggleLock(p.id)}
+                      className={`btn-action ${p.braceletStatus === 'active' ? 'lock' : 'unlock'}`}
+                      title={p.braceletStatus === 'active' ? 'Khóa' : 'Mở khóa'}
+                    >
+                      {p.braceletStatus === 'active' ? <FiLock /> : <FiUnlock />}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="btn-action delete"
+                      title="Xóa"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-center py-4 text-muted">
+              {searchTerm.trim() 
+                ? `Không tìm thấy bệnh nhân nào phù hợp với từ khóa "${searchTerm}"`
+                : 'Không tìm thấy bệnh nhân nào phù hợp với bộ lọc.'
+              }
+            </div>
+          )}
         </div>
         
         {/* Pagination - hide when searching */}

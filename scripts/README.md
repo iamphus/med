@@ -4,9 +4,20 @@ Thư mục này chứa các utility scripts cho project.
 
 ## 📄 Available Scripts
 
-### `migrateData.js` - Firebase Data Migration
+### `migrateData.cjs` - Firebase Data Migration
 
 **Mục đích:** Import mock data từ `src/data/mockData.js` vào Firestore.
+
+### `uploadMedicalData.cjs` ⭐ MỚI - Upload Dữ Liệu Y Tế
+
+**Mục đích:** Upload danh sách dị ứng và bệnh nền y tế lên Firestore để hỗ trợ tìm kiếm autocomplete.
+
+**Tạo Collections:**
+- `medical_allergies` (45 dị ứng phổ biến)
+- `medical_conditions` (60 bệnh nền phổ biến)
+- `medical_metadata` (thống kê)
+
+**Chạy:** `node scripts/uploadMedicalData.cjs`
 
 **Khi nào dùng:**
 - Setup project lần đầu tiên

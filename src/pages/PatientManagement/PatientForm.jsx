@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiX, FiCamera, FiUpload, FiUser, FiPlus, FiTrash2 } from 'react-icons/fi';
+import MedicalAutocomplete from '../../components/MedicalAutocomplete';
+import { useMedicalData } from '../../hooks/useMedicalData';
 
 export default function PatientForm({ patient, onSave, onClose }) {
+  const { searchAllergies, searchConditions, loading: medicalDataLoading } = useMedicalData();
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
@@ -20,9 +23,6 @@ export default function PatientForm({ patient, onSave, onClose }) {
     specialInstructions: '',
     medications: '',
   });
-
-  const [allergyInput, setAllergyInput] = useState('');
-  const [conditionInput, setConditionInput] = useState('');
 
   useEffect(() => {
     if (patient) {
@@ -107,16 +107,24 @@ export default function PatientForm({ patient, onSave, onClose }) {
   };
 
   // Tags (allergies, conditions)
-  const addTag = (field, input, setInput) => {
-    const trimmed = input.trim();
-    if (trimmed && !form[field].includes(trimmed)) {
-      updateForm(field, [...form[field], trimmed]);
-      setInput('');
+  const addAllergy = (allergyName) => {
+    if (allergyName && !form.allergies.includes(allergyName)) {
+      updateForm('allergies', [...form.allergies, allergyName]);
     }
   };
 
-  const removeTag = (field, index) => {
-    updateForm(field, form[field].filter((_, i) => i !== index));
+  const removeAllergy = (index) => {
+    updateForm('allergies', form.allergies.filter((_, i) => i !== index));
+  };
+
+  const addCondition = (conditionName) => {
+    if (conditionName && !form.conditions.includes(conditionName)) {
+      updateForm('conditions', [...form.conditions, conditionName]);
+    }
+  };
+
+  const removeCondition = (index) => {
+    updateForm('conditions', form.conditions.filter((_, i) => i !== index));
   };
 
   // Emergency contacts
@@ -271,68 +279,30 @@ export default function PatientForm({ patient, onSave, onClose }) {
           <div className="form-section">
             <h4 className="form-section-title">Thông tin y tế</h4>
 
-            {/* Allergies */}
-            <div className="form-group">
-              <label className="form-label">Dị ứng</label>
-              <div className="tag-input-wrapper">
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Nhập tên dị ứng, nhấn Enter..."
-                  value={allergyInput}
-                  onChange={(e) => setAllergyInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addTag('allergies', allergyInput, setAllergyInput);
-                    }
-                  }}
-                />
-                {form.allergies.length > 0 && (
-                  <div className="tag-list">
-                    {form.allergies.map((a, i) => (
-                      <span key={i} className="badge badge-danger tag-item">
-                        {a}
-                        <button type="button" onClick={() => removeTag('allergies', i)} className="tag-remove">
-                          <FiX />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Conditions */}
+            {/* Conditions - Đưa lên trước */}
             <div className="form-group">
               <label className="form-label">Bệnh nền</label>
-              <div className="tag-input-wrapper">
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Nhập bệnh nền, nhấn Enter..."
-                  value={conditionInput}
-                  onChange={(e) => setConditionInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addTag('conditions', conditionInput, setConditionInput);
-                    }
-                  }}
-                />
-                {form.conditions.length > 0 && (
-                  <div className="tag-list">
-                    {form.conditions.map((c, i) => (
-                      <span key={i} className="badge badge-warning tag-item">
-                        {c}
-                        <button type="button" onClick={() => removeTag('conditions', i)} className="tag-remove">
-                          <FiX />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <MedicalAutocomplete
+                type="condition"
+                placeholder="Tìm kiếm bệnh nền (tiểu đường, tăng huyết áp...)..."
+                selectedItems={form.conditions}
+                onAdd={addCondition}
+                onRemove={removeCondition}
+                searchFunction={searchConditions}
+              />
+            </div>
+
+            {/* Allergies - Đưa xuống sau */}
+            <div className="form-group">
+              <label className="form-label">Dị ứng</label>
+              <MedicalAutocomplete
+                type="allergy"
+                placeholder="Tìm kiếm dị ứng (thuốc, thực phẩm...)..."
+                selectedItems={form.allergies}
+                onAdd={addAllergy}
+                onRemove={removeAllergy}
+                searchFunction={searchAllergies}
+              />
             </div>
 
             {/* Special Instructions */}

@@ -162,13 +162,14 @@
 - [ ] Activity logs (audit trail)
 - [ ] Bulk operations (delete, export, lock)
 
-### UI Enhancements (✅ HOÀN THÀNH)
+### UI Enhancements (✅ 90% HOÀN THÀNH)
 - [x] Toast notifications (success/error) 
 - [x] Confirmation dialogs
 - [ ] Empty states với CTA
 - [x] Skeleton loaders (có loading states)
 - [x] **Pagination cho table (20 items/page, smart navigation)**
 - [x] **500 test patients generated**
+- [x] **Medical autocomplete cho dị ứng và bệnh nền** 🆕
 - [ ] Sort columns
 
 ### Dashboard UX Improvements (✅ HOÀN THÀNH - Today)
@@ -418,6 +419,18 @@
 8. ✅ **IMPLEMENT PAGINATION (20/page, smart page navigation)**
 9. ✅ Mobile responsive cho tất cả improvements trên
 10. ✅ **DEPLOYED TO VERCEL PRODUCTION** 🚀
+11. ✅ **MEDICAL AUTOCOMPLETE - Dị ứng & Bệnh nền** 🏥
+
+**New Feature: Medical Data Autocomplete** 🆕
+- ✅ Created `medical_allergies` collection (45 allergies)
+- ✅ Created `medical_conditions` collection (60 conditions)
+- ✅ Built `MedicalAutocomplete` component với search
+- ✅ Integrated autocomplete vào PatientForm
+- ✅ Upload medical data lên Firestore
+- ✅ Updated Firestore rules cho medical collections
+- ✅ Added `useMedicalData` hook để fetch từ Firestore
+- ✅ Documentation: MEDICAL_DATA_SETUP.md
+- ✅ Demo guide: DEMO_MEDICAL_AUTOCOMPLETE.md
 
 **Technical Details:**
 - ✅ Updated `usePatients` hook với pagination support

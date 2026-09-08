@@ -3,9 +3,10 @@
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-main);
+  position: relative;
 }
 
-/* Sidebar */
+/* Sidebar - Fixed position */
 .admin-sidebar {
   width: 240px;
   background-color: var(--bg-sidebar);
@@ -15,50 +16,69 @@
   transition: transform 0.3s ease-in-out;
   flex-shrink: 0;
   z-index: 100;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
 }
 
 .admin-sidebar.closed {
-  width: 0;
-  overflow: hidden;
+  transform: translateX(-240px);
+}
+
+/* Add margin to main container when sidebar is open */
+.admin-main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 240px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.admin-sidebar.closed ~ .admin-main-container {
+  margin-left: 0;
 }
 
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem 1rem;
+  gap: 0.6rem;
+  padding: 0.9rem 0.85rem;
   background-color: #0f172a;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
 }
 
 .brand-logo-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   background-color: var(--primary);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   flex-shrink: 0;
 }
 
 .brand-text h2 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.2;
 }
 
 .brand-text span {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #94a3b8;
 }
 
 .sidebar-section-label {
-  padding: 1.25rem 1rem 0.5rem;
-  font-size: 0.7rem;
+  padding: 0.9rem 0.85rem 0.4rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #64748b;
@@ -68,7 +88,7 @@
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   padding: 0 0.5rem;
   flex: 1;
 }
@@ -76,11 +96,11 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 0.85rem;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
   color: #cbd5e1;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 500;
   border-radius: var(--radius-sm);
   transition: var(--transition);
@@ -98,31 +118,32 @@
 }
 
 .nav-icon {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .sidebar-footer {
-  padding: 1rem;
+  padding: 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   background-color: #0f172a;
+  flex-shrink: 0;
 }
 
 .user-mini-profile {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.6rem;
 }
 
 .user-avatar-sm {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background-color: #334155;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .user-info-sm {
@@ -132,7 +153,7 @@
 }
 
 .user-email-sm {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #f1f5f9;
   font-weight: 500;
   white-space: nowrap;
@@ -141,45 +162,37 @@
 }
 
 .user-role-sm {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: #94a3b8;
-}
-
-/* Main Container */
-.admin-main-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
 }
 
 /* Topbar */
 .admin-topbar {
-  height: 52px;
+  height: 48px;
   background-color: #0284c7;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.25rem;
+  padding: 0 1rem;
   box-shadow: var(--shadow-sm);
 }
 
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .sidebar-toggle-btn {
   background: transparent;
   border: none;
   color: #fff;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 0.25rem;
+  padding: 0.2rem;
   border-radius: 4px;
 }
 
@@ -190,8 +203,8 @@
 .topbar-support-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 0.825rem;
+  gap: 0.65rem;
+  font-size: 0.78rem;
   color: #e0f2fe;
 }
 
@@ -202,30 +215,29 @@
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .topbar-user-badge {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
+  gap: 0.35rem;
+  font-size: 0.8rem;
   font-weight: 500;
-
 }
 
 .btn-logout-topbar {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #fff;
-  padding: 0.3rem 0.75rem;
+  padding: 0.28rem 0.7rem;
   border-radius: var(--radius-sm);
-  font-size: 0.825rem;
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   transition: var(--transition);
 }
 
@@ -235,16 +247,17 @@
 
 /* Content Body */
 .admin-content-body {
-  padding: 1.5rem;
+  padding: 0.9rem;
   flex: 1;
+  overflow-y: auto;
 }
 
 /* Footer Bar */
 .admin-footer-bar {
-  padding: 0.85rem 1.5rem;
+  padding: 0.7rem 1.15rem;
   background-color: #fff;
   border-top: 1px solid var(--border-color);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
@@ -255,18 +268,12 @@
 
 @media (max-width: 992px) {
   .admin-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
     box-shadow: 2px 0 8px rgba(0,0,0,0.1);
     z-index: 1000;
-    transition: transform 0.3s ease-in-out;
   }
   
   .admin-sidebar.closed {
-    transform: translateX(-100%);
-    width: 240px;
+    transform: translateX(-240px);
   }
   
   .admin-sidebar.open {
@@ -298,10 +305,9 @@
     }
   }
   
-  /* Push content to make room when sidebar is in desktop mode */
+  /* On mobile, no margin for main container */
   .admin-main-container {
     margin-left: 0;
-    width: 100%;
   }
   
   .topbar-support-info {
@@ -309,12 +315,12 @@
   }
   
   .admin-content-body {
-    padding: 1rem;
+    padding: 0.95rem;
   }
   
   .admin-footer-bar {
-    padding: 0.75rem 1rem;
-    font-size: 0.75rem;
+    padding: 0.65rem 0.95rem;
+    font-size: 0.72rem;
   }
 }
 
