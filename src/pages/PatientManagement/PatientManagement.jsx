@@ -8,11 +8,15 @@ import {
 import AdminLayout from '../../components/AdminLayout';
 import PatientForm from './PatientForm';
 import QRCodeCard from '../../components/QRCodeCard';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import { usePatients } from '../../hooks/usePatients';
 import { calculateAge } from '../../data/mockData';
+import { useToast } from '../../components/ToastContainer';
 import './PatientManagement.css';
 
 export default function PatientManagement() {
+  const toast = useToast();
+  
   // Firestore hooks with pagination (10 per page)
   const { 
     patients, 
@@ -44,6 +48,7 @@ export default function PatientManagement() {
   const [editingPatient, setEditingPatient] = useState(null);
   const [qrPatient, setQrPatient] = useState(null);
   const [detailPatient, setDetailPatient] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, name }
   
   // Local loading states for operations
   const [operationLoading, setOperationLoading] = useState(false);
@@ -139,8 +144,9 @@ export default function PatientManagement() {
       if (result.success) {
         setShowFormModal(false);
         setEditingPatient(null);
+        toast.success(`Cập nhật thông tin bệnh nhân "${patientData.name}" thành công!`);
       } else {
-        alert(`Lỗi cập nhật: ${result.error}`);
+        toast.error(`Lỗi cập nhật: ${result.error}`);
       }
     } else {
       // Create new patient
@@ -158,6 +164,7 @@ export default function PatientManagement() {
       
       if (result.success) {
         setShowFormModal(false);
+        toast.success(`Thêm bệnh nhân "${patientData.name}" thành công!`);
         // Tự động hiển thị modal QR sau khi thêm bệnh nhân mới
         // Note: need to find the newly added patient from the list
         setTimeout(() => {
@@ -167,7 +174,7 @@ export default function PatientManagement() {
           }
         }, 500);
       } else {
-        alert(`Lỗi thêm bệnh nhân: ${result.error}`);
+        toast.error(`Lỗi thêm bệnh nhân: ${result.error}`);
       }
     }
     
@@ -181,21 +188,35 @@ export default function PatientManagement() {
     const nextStatus = patient.braceletStatus === 'active' ? 'locked' : 'active';
     const result = await updatePatient(id, { braceletStatus: nextStatus });
     
-    if (!result.success) {
-      alert(`Lỗi cập nhật trạng thái: ${result.error}`);
+    if (result.success) {
+      const action = nextStatus === 'locked' ? 'khóa' : 'mở khóa';
+      toast.success(`Đã ${action} vòng tay của "${patient.name}" thành công!`);
+    } else {
+      toast.error(`Lỗi cập nhật trạng thái: ${result.error}`);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa bệnh nhân này khỏi hệ thống?')) {
-      setOperationLoading(true);
-      const result = await deletePatient(id);
-      
-      if (!result.success) {
-        alert(`Lỗi xóa bệnh nhân: ${result.error}`);
-      }
-      setOperationLoading(false);
+  const handleDelete = (id) => {
+    const patient = patients.find(p => p.id === id);
+    if (!patient) return;
+    
+    setDeleteConfirm({ id, name: patient.name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    
+    setOperationLoading(true);
+    const result = await deletePatient(deleteConfirm.id);
+    
+    if (result.success) {
+      toast.success(`Đã xóa bệnh nhân "${deleteConfirm.name}" thành công!`);
+    } else {
+      toast.error(`Lỗi xóa bệnh nhân: ${result.error}`);
     }
+    
+    setDeleteConfirm(null);
+    setOperationLoading(false);
   };
 
   const handleExportCSV = () => {
@@ -212,6 +233,8 @@ export default function PatientManagement() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    toast.success(`Đã xuất file CSV với ${patients.length} bệnh nhân!`);
   };
 
   return (
@@ -759,6 +782,19 @@ export default function PatientManagement() {
         <QRCodeCard
           patient={qrPatient}
           onClose={() => setQrPatient(null)}
+        />
+      )}
+
+      {/* Confirm Delete Dialog */}
+      {deleteConfirm && (
+        <ConfirmDialog
+          title="Xác nhận xóa bệnh nhân"
+          message={`Bạn có chắc chắn muốn xóa bệnh nhân "${deleteConfirm.name}" khỏi hệ thống? Hành động này không thể hoàn tác.`}
+          confirmText="Xóa bệnh nhân"
+          cancelText="Hủy bỏ"
+          type="danger"
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
         />
       )}
     </AdminLayout>

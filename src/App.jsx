@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { ToastProvider } from './components/ToastContainer';
 import EmergencyInfo from './pages/EmergencyInfo/EmergencyInfo';
 import PatientManagement from './pages/PatientManagement/PatientManagement';
 import DoctorAuth from './pages/DoctorAuth/DoctorAuth';
@@ -37,34 +38,36 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Trang 1: Thông tin cấp cứu (Public) */}
-          <Route path="/emergency/:patientId" element={<EmergencyInfo />} />
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Trang 1: Thông tin cấp cứu (Public) */}
+            <Route path="/emergency/:patientId" element={<EmergencyInfo />} />
 
-          {/* Trang 3: Xác thực bác sĩ & Bệnh án (Public nhưng cần OTP) */}
-          <Route path="/medical-record/:patientId" element={<DoctorAuth />} />
+            {/* Trang 3: Xác thực bác sĩ & Bệnh án (Public nhưng cần OTP) */}
+            <Route path="/medical-record/:patientId" element={<DoctorAuth />} />
 
-          {/* Trang Login */}
-          <Route path="/login" element={<Login />} />
+            {/* Trang Login */}
+            <Route path="/login" element={<Login />} />
 
-          {/* Trang 2: Quản lý bệnh nhân (Protected) */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <PatientManagement />
-              </ProtectedRoute>
-            }
-          />
+            {/* Trang 2: Quản lý bệnh nhân (Protected) */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <PatientManagement />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Redirect mặc định */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* 404 Page */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Redirect mặc định */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            
+            {/* 404 Page */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }
