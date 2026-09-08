@@ -94,29 +94,36 @@ export default function MedicalAutocomplete({
   }, [onAdd]);
 
   const handleKeyDown = useCallback((e) => {
-    if (!showSuggestions) return;
-
     switch (e.key) {
       case 'Enter':
         e.preventDefault();
-        if (focusedIndex >= 0 && focusedIndex < suggestions.length) {
+        // Nếu đang focus vào suggestion thì chọn suggestion đó
+        if (showSuggestions && focusedIndex >= 0 && focusedIndex < suggestions.length) {
           handleSelectItem(suggestions[focusedIndex]);
-        } else if (input.trim() && suggestions.length === 0) {
+        } 
+        // Nếu có text trong input thì thêm text đó vào (dù có suggestions hay không)
+        else if (input.trim()) {
           onAdd(input.trim());
           setInput('');
+          setSuggestions([]);
+          setShowSuggestions(false);
         }
         break;
       
       case 'ArrowDown':
-        e.preventDefault();
-        setFocusedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
+        if (showSuggestions && suggestions.length > 0) {
+          e.preventDefault();
+          setFocusedIndex(prev => 
+            prev < suggestions.length - 1 ? prev + 1 : prev
+          );
+        }
         break;
       
       case 'ArrowUp':
-        e.preventDefault();
-        setFocusedIndex(prev => prev > 0 ? prev - 1 : 0);
+        if (showSuggestions && suggestions.length > 0) {
+          e.preventDefault();
+          setFocusedIndex(prev => prev > 0 ? prev - 1 : 0);
+        }
         break;
       
       case 'Escape':

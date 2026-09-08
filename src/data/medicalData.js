@@ -26,19 +26,75 @@ export const commonAllergies = [
   { id: 'allergy-019', name: 'Lidocaine (gây tê)', category: 'Gây tê', severity: 'medium' },
   { id: 'allergy-020', name: 'Novocaine (Procaine)', category: 'Gây tê', severity: 'medium' },
   
-  // Thuốc khác
-  { id: 'allergy-021', name: 'Insulin', category: 'Nội tiết', severity: 'high' },
-  { id: 'allergy-022', name: 'Heparin', category: 'Chống đông', severity: 'high' },
-  { id: 'allergy-023', name: 'Warfarin', category: 'Chống đông', severity: 'medium' },
-  { id: 'allergy-024', name: 'Amlodipine', category: 'Tim mạch', severity: 'medium' },
-  { id: 'allergy-025', name: 'Atorvastatin', category: 'Hạ mỡ máu', severity: 'medium' },
+  // Thuốc tim mạch
+  { id: 'allergy-021', name: 'Amlodipine', category: 'Tim mạch', severity: 'medium' },
+  { id: 'allergy-022', name: 'Enalapril (ACE inhibitor)', category: 'Tim mạch', severity: 'medium' },
+  { id: 'allergy-023', name: 'Losartan (ARB)', category: 'Tim mạch', severity: 'medium' },
+  { id: 'allergy-024', name: 'Atenolol (Beta-blocker)', category: 'Tim mạch', severity: 'medium' },
+  { id: 'allergy-025', name: 'Bisoprolol (Beta-blocker)', category: 'Tim mạch', severity: 'medium' },
+  { id: 'allergy-026', name: 'Metoprolol (Beta-blocker)', category: 'Tim mạch', severity: 'medium' },
+  { id: 'allergy-027', name: 'Carvedilol', category: 'Tim mạch', severity: 'medium' },
+  { id: 'allergy-028', name: 'Digoxin', category: 'Tim mạch', severity: 'high' },
+  { id: 'allergy-029', name: 'Nitrates (Nitroglycerin)', category: 'Tim mạch', severity: 'medium' },
+  
+  // Thuốc lợi tiểu
+  { id: 'allergy-030', name: 'Thiazide (Hydrochlorothiazide)', category: 'Lợi tiểu', severity: 'medium' },
+  { id: 'allergy-031', name: 'Furosemide (Lasix)', category: 'Lợi tiểu', severity: 'medium' },
+  { id: 'allergy-032', name: 'Spironolactone', category: 'Lợi tiểu', severity: 'medium' },
+  
+  // Thuốc nội tiết
+  { id: 'allergy-033', name: 'Insulin', category: 'Nội tiết', severity: 'high' },
+  { id: 'allergy-034', name: 'Metformin', category: 'Nội tiết', severity: 'medium' },
+  { id: 'allergy-035', name: 'Glibenclamide', category: 'Nội tiết', severity: 'medium' },
+  { id: 'allergy-036', name: 'Levothyroxine (thuốc giáp)', category: 'Nội tiết', severity: 'medium' },
+  
+  // Thuốc chống đông/Chống kết tập tiểu cầu
+  { id: 'allergy-037', name: 'Heparin', category: 'Chống đông', severity: 'high' },
+  { id: 'allergy-038', name: 'Warfarin (Coumadin)', category: 'Chống đông', severity: 'high' },
+  { id: 'allergy-039', name: 'Clopidogrel (Plavix)', category: 'Chống đông', severity: 'medium' },
+  { id: 'allergy-040', name: 'Rivaroxaban (NOAC)', category: 'Chống đông', severity: 'high' },
+  { id: 'allergy-041', name: 'Apixaban (NOAC)', category: 'Chống đông', severity: 'high' },
+  
+  // Thuốc hạ mỡ máu
+  { id: 'allergy-042', name: 'Atorvastatin (Statin)', category: 'Hạ mỡ máu', severity: 'medium' },
+  { id: 'allergy-043', name: 'Simvastatin (Statin)', category: 'Hạ mỡ máu', severity: 'medium' },
+  { id: 'allergy-044', name: 'Rosuvastatin (Statin)', category: 'Hạ mỡ máu', severity: 'medium' },
+  { id: 'allergy-045', name: 'Fenofibrate', category: 'Hạ mỡ máu', severity: 'medium' },
+  
+  // Thuốc dạ dày
+  { id: 'allergy-046', name: 'Omeprazole (PPI)', category: 'Dạ dày', severity: 'low' },
+  { id: 'allergy-047', name: 'Esomeprazole (PPI)', category: 'Dạ dày', severity: 'low' },
+  { id: 'allergy-048', name: 'Ranitidine (H2 blocker)', category: 'Dạ dày', severity: 'low' },
+  
+  // Thuốc corticosteroid
+  { id: 'allergy-049', name: 'Prednisone', category: 'Corticosteroid', severity: 'medium' },
+  { id: 'allergy-050', name: 'Dexamethasone', category: 'Corticosteroid', severity: 'medium' },
+  { id: 'allergy-051', name: 'Hydrocortisone', category: 'Corticosteroid', severity: 'medium' },
+  
+  // Thuốc kháng histamine
+  { id: 'allergy-052', name: 'Diphenhydramine (Benadryl)', category: 'Kháng histamine', severity: 'low' },
+  { id: 'allergy-053', name: 'Cetirizine', category: 'Kháng histamine', severity: 'low' },
+  { id: 'allergy-054', name: 'Loratadine', category: 'Kháng histamine', severity: 'low' },
+  
+  // Thuốc thần kinh
+  { id: 'allergy-055', name: 'Phenytoin (chống động kinh)', category: 'Thần kinh', severity: 'high' },
+  { id: 'allergy-056', name: 'Carbamazepine', category: 'Thần kinh', severity: 'high' },
+  { id: 'allergy-057', name: 'Gabapentin', category: 'Thần kinh', severity: 'medium' },
+  { id: 'allergy-058', name: 'Pregabalin', category: 'Thần kinh', severity: 'medium' },
+  
+  // Thuốc tâm thần
+  { id: 'allergy-059', name: 'Sertraline (SSRI)', category: 'Tâm thần', severity: 'medium' },
+  { id: 'allergy-060', name: 'Fluoxetine (SSRI)', category: 'Tâm thần', severity: 'medium' },
+  { id: 'allergy-061', name: 'Alprazolam (Benzodiazepine)', category: 'Tâm thần', severity: 'medium' },
+  { id: 'allergy-062', name: 'Diazepam (Benzodiazepine)', category: 'Tâm thần', severity: 'medium' },
   
   // Thuốc cản quang và vật liệu y tế
-  { id: 'allergy-026', name: 'Iodine (Cản quang)', category: 'Chẩn đoán', severity: 'high' },
-  { id: 'allergy-027', name: 'Gadolinium (MRI)', category: 'Chẩn đoán', severity: 'high' },
-  { id: 'allergy-028', name: 'Latex', category: 'Vật liệu', severity: 'high' },
-  { id: 'allergy-029', name: 'Băng dính y tế', category: 'Vật liệu', severity: 'low' },
-  { id: 'allergy-030', name: 'Cồn y tế', category: 'Vật liệu', severity: 'low' },
+  { id: 'allergy-063', name: 'Iodine (Cản quang)', category: 'Chẩn đoán', severity: 'high' },
+  { id: 'allergy-064', name: 'Gadolinium (MRI)', category: 'Chẩn đoán', severity: 'high' },
+  { id: 'allergy-065', name: 'Barium (Cản quang)', category: 'Chẩn đoán', severity: 'medium' },
+  { id: 'allergy-066', name: 'Latex', category: 'Vật liệu', severity: 'high' },
+  { id: 'allergy-067', name: 'Băng dính y tế', category: 'Vật liệu', severity: 'low' },
+  { id: 'allergy-068', name: 'Cồn y tế', category: 'Vật liệu', severity: 'low' },
   
   // Thực phẩm
   { id: 'allergy-031', name: 'Hải sản (tôm, cua)', category: 'Thực phẩm', severity: 'high' },
